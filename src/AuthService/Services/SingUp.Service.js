@@ -17,7 +17,7 @@ class SingUpService extends IService {
 
 		PasswordValidation.validate(password);
 
-		return this._container.Repositories.userRepository.Create({
+		const user = this._container.Repositories.userRepository.Create({
 			values: {
 				username,
 				password,
@@ -25,6 +25,10 @@ class SingUpService extends IService {
 			},
 			options: {},
 		});
+
+		user.password = undefined;
+
+		return user;
 	}
 }
 

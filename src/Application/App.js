@@ -13,8 +13,8 @@ class App {
 		app.use(express.json({ limit: "10kb" }));
 		require("../routes")(app);
 
-		app.all("*", (rq, rs, _nx) => {
-			return next(new AppError("NOT_FOUND", 404));
+		app.all("*", (rq, rs, nx) => {
+			return nx(new AppError("NOT_FOUND", 404));
 		});
 
 		app.use(globalErrorHandler);

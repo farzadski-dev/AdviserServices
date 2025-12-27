@@ -1,9 +1,6 @@
 const jwt = require("jsonwebtoken"),
 	catchAsync = require("../../utils/catchAsync"),
 	Helper = require("../../utils/Helper"),
-	SanitizeBearerToken = require("../Services/utils/SanitizeBearerToken"),
-	DecodeToken = require("../Services/decodeToken/DecodeToken.Service"),
-	{ ThisUserIsNotExistException } = require("../../utils/exceptions"),
 	Controller = require("../../core/Controller");
 
 class AuthController extends Controller {
@@ -30,15 +27,13 @@ class AuthController extends Controller {
 		});
 	});
 
-	singUp = this.catchAsync(async (rq, rp, _next) => {
+	singUp = this.asyncWrap.Wrap(async (rq, rp, _next) => {
 		const { username, password, role } = rq.body,
 			user = await this._container.Services.singUpService.Execute({
 				username,
 				password,
 				role,
 			});
-
-		user.password = undefined;
 
 		this.sendCreatedResponse(rp, {
 			data: {
@@ -64,39 +59,30 @@ class AuthController extends Controller {
 		});
 	});
 
-	protect = catchAsync(async (request, response, nx) => {
-		const token = new SanitizeBearerToken(
-				request.headers.authorization,
-			).execute(),
-			decodedToken = await new DecodeToken().Execute({ token }),
-			freshUser = await this._container.Repositories.userRepository.GetUserByPk(
-				{
-					userId: decodedToken.id,
-				},
-			);
-
-		echo({ freshUser });
-
-		if (!freshUser) {
-			throw new ThisUserIsNotExistException();
-		}
-
-		request.user = freshUser;
+	protect = this.asyncWrap.Wrap(async (rq, rs, nx) => {
+		const bearerToken = rq.headers.authorization;
+		rq.user = await this._container.Services.protectByTokenService.Execute({
+			bearerToken,
+		});
 		nx();
 	});
 
-	assignACategoryToThisUser = catchAsync(async (request, response, next) => {
-		const { categoryId, userId } = request.body;
-		const user = await User.update(
-			{
+	assignACategoryToThisUser = catchAsync(async (rq, rs, _nx) => {
+		const { categoryId, userId } = rq.body,
+			user = await this._container.Services.assignUserCategoryService.Execute({
 				categoryId,
-			},
-			{
-				where: { id: userId },
-			},
-		);
+				userId,
+			});
+		// const user = await User.update(
+		// 	{
+		// 		categoryId,
+		// 	},
+		// 	{
+		// 		where: { id: userId },
+		// 	},
+		// );
 
-		response.status(200).json({
+		rs.status(200).json({
 			status: "success",
 			data: {
 				user,

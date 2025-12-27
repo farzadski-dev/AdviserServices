@@ -1,9 +1,41 @@
-class ProtectByTokenService {
-	#token;
+const IService = require("@Core/IService"),
+	{ ThisUserIsNotExistException } = require("../../utils/exceptions");
 
-	constructor(token) {
-		this.#token = token;
+class ProtectByTokenService extends IService {
+	constructor(_container) {
+		super();
+
+		Object.assign(this, {
+			_container,
+		});
 	}
 
-	async execute() {}
+	/**
+	 *
+	 * @param input.bearerToken
+	 * @return {Promise<>}
+	 * @constructor
+	 */
+	async Execute(input) {
+		const { bearerToken } = input,
+			token = this._container.Services.sanitizeBearerTokenService.Execute({
+				bearerToken,
+			}),
+			decodedToken = await this._container.Services.decodeTokenService.Execute({
+				token,
+			}),
+			freshUser = await this._container.Repositories.userRepository.GetUserByPk(
+				{
+					userId: decodedToken.id,
+				},
+			);
+
+		if (!freshUser) {
+			throw new ThisUserIsNotExistException();
+		}
+
+		return freshUser;
+	}
 }
+
+module.exports = ProtectByTokenService;

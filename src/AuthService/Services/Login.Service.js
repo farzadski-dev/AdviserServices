@@ -20,7 +20,7 @@ class LoginService extends IService {
 		let token;
 
 		const user = await this._container.Repositories.userRepository.FindOne({
-			username,
+			where: { username },
 		});
 
 		if (user === null) {

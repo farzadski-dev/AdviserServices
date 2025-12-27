@@ -16,9 +16,9 @@ class UserRepositoryPostgreSQL extends IUserRepository {
 	}
 
 	async FindOne(input) {
-		const { condition, include } = input;
+		const { where } = input;
 
-		return this.DBModel.findOne({ where: condition, include });
+		return this.DBModel.findOne({ where });
 	}
 
 	async IsThisPasswordCorrect(input) {
@@ -49,6 +49,12 @@ class UserRepositoryPostgreSQL extends IUserRepository {
 				},
 			],
 		});
+	}
+
+	async Update(input) {
+		const { values, where } = input;
+
+		return this.DBModel.update(values, { where, returning: true });
 	}
 }
 
