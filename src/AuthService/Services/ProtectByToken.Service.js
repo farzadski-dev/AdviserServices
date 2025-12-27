@@ -1,4 +1,4 @@
-class ProtectViaToken {
+class ProtectByTokenService {
 	#token;
 
 	constructor(token) {

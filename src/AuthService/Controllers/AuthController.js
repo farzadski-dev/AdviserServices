@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken"),
 	Helper = require("../../utils/Helper"),
 	SanitizeBearerToken = require("../Services/utils/SanitizeBearerToken"),
 	DecodeToken = require("../Services/decodeToken/DecodeToken.Service"),
-	GetUserByPk = require("../Services/common/GetUserByPk"),
 	{ ThisUserIsNotExistException } = require("../../utils/exceptions"),
 	Controller = require("../../core/Controller");
 
@@ -14,9 +13,9 @@ class AuthController extends Controller {
 		Object.assign(this, { _container });
 	}
 
-	singUp = this.catchAsync(async (rq, rp, _next) => {
+	SignUp = this.asyncWrap.Wrap(async (rq, rp, _nx) => {
 		const { username, password, role } = rq.body,
-			user = await this._container.Services.singUpService.execute({
+			user = await this._container.Services.singUpService.Execute({
 				username,
 				password,
 				role,
@@ -31,14 +30,30 @@ class AuthController extends Controller {
 		});
 	});
 
-	login = catchAsync(async (rq, rp, _next) => {
-		const { username, password } = rq.body;
-
-		const { user, token, tokenType } =
-			await this._container.Services.loginService.Execute({
+	singUp = this.catchAsync(async (rq, rp, _next) => {
+		const { username, password, role } = rq.body,
+			user = await this._container.Services.singUpService.Execute({
 				username,
 				password,
+				role,
 			});
+
+		user.password = undefined;
+
+		this.sendCreatedResponse(rp, {
+			data: {
+				user,
+			},
+		});
+	});
+
+	login = this.asyncWrap.Wrap(async (rq, rp, _ne) => {
+		const { username, password } = rq.body,
+			{ user, token, tokenType } =
+				await this._container.Services.loginService.Execute({
+					username,
+					password,
+				});
 
 		this.sendSuccessResponse(rp, {
 			data: {
@@ -49,21 +64,25 @@ class AuthController extends Controller {
 		});
 	});
 
-	protect = catchAsync(async (request, response, next) => {
+	protect = catchAsync(async (request, response, nx) => {
 		const token = new SanitizeBearerToken(
-			request.headers.authorization
-		).execute();
+				request.headers.authorization,
+			).execute(),
+			decodedToken = await new DecodeToken().Execute({ token }),
+			freshUser = await this._container.Repositories.userRepository.GetUserByPk(
+				{
+					userId: decodedToken.id,
+				},
+			);
 
-		const decodedToken = await new DecodeToken(token).execute();
-
-		const freshUser = await new GetUserByPk(decodedToken.id).execute();
+		echo({ freshUser });
 
 		if (!freshUser) {
 			throw new ThisUserIsNotExistException();
 		}
 
 		request.user = freshUser;
-		next();
+		nx();
 	});
 
 	assignACategoryToThisUser = catchAsync(async (request, response, next) => {
@@ -74,7 +93,7 @@ class AuthController extends Controller {
 			},
 			{
 				where: { id: userId },
-			}
+			},
 		);
 
 		response.status(200).json({
@@ -93,7 +112,7 @@ class AuthController extends Controller {
 			},
 			{
 				where: { id: userId },
-			}
+			},
 		);
 
 		response.status(200).json({

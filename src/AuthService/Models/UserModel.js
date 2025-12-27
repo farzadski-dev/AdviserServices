@@ -1,11 +1,7 @@
-const { DataTypes, Sequelize } = require("sequelize");
-const bcrypt = require("bcryptjs");
-
-const PostgresDB = require("../../database/PostgresDB");
-const { sequelize } = new PostgresDB();
-
-const TAG = `app:${__filename.slice(__dirname.length + 1, -3)}`;
-const myDebugger = require("../../utils/debugger")(TAG);
+const { DataTypes, Sequelize } = require("sequelize"),
+	bcrypt = require("bcryptjs"),
+	PostgresDB = require("../../database/PostgresDB"),
+	{ sequelize } = new PostgresDB();
 
 const User = sequelize.define(
 	"user",
@@ -22,8 +18,11 @@ const User = sequelize.define(
 			unique: true,
 		},
 		role: {
-			type: DataTypes.ENUM("admin", "adviser", "client"),
+			type: DataTypes.STRING,
 			defaultValue: "client",
+			validate: {
+				isIn: [["admin", "adviser", "client"]],
+			},
 		},
 		password: {
 			type: DataTypes.STRING,
@@ -33,7 +32,7 @@ const User = sequelize.define(
 	{
 		timestamps: true,
 		indexes: [{ unique: true, fields: ["username"] }],
-	}
+	},
 );
 
 User.beforeCreate(async (user, _options) => {

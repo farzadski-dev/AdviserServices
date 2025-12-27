@@ -1,14 +1,12 @@
-const dotenv = require('dotenv');
-dotenv.config({ path: './config.env' });
+const dotenv = require("dotenv");
+dotenv.config({ path: "./.env" });
+require("module-alias/register");
+require("./src/utils/_Globals");
 
-const PostgresDB = require('./src/database/PostgresDB');
-const SyncPostgresDB = require('./src/database/SyncPostgresDB');
-const AppListen = require('./App.Listen');
-
-const TAG = `app:${__filename.slice(__dirname.length + 1, -3)}`;
-const myDebugger = require('./src/utils/debugger')(TAG);
-
-const { App } = require('./src');
+const PostgresDB = require("./src/database/PostgresDB"),
+	SyncPostgresDB = require("./src/database/SyncPostgresDB"),
+	AppListen = require("./App.Listen"),
+	{ App } = require("./src");
 
 class Server {
 	async run() {

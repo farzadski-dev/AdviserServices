@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 
-const AuthController = require("../../../AuthService/Controllers/AuthController");
-const auth = new AuthController();
+const _container = require("../../../AuthService/Di/DiContainer").get(),
+	AuthController = require("../../../AuthService/Controllers/AuthController"),
+	{ protect, allowTo } = new AuthController(_container);
 
 const CategoryController = require("../../../controllers/CategoryController");
 
@@ -12,33 +13,21 @@ router.use("/:categoryId/questions", questionRouter);
 
 router
 	.route("/")
-	.post(
-		auth.protect,
-		auth.allowTo("admin"),
-		CategoryController.createParentCategory
-	)
+	.post(protect, allowTo("admin"), CategoryController.createParentCategory)
 	.get(CategoryController.getAllCategories);
 
 router
 	.route("/:categoryId/children")
 	.post(
-		auth.protect,
-		auth.allowTo("admin"),
-		CategoryController.createChildForParentCategory
+		protect,
+		allowTo("admin"),
+		CategoryController.createChildForParentCategory,
 	);
 
 router
 	.route("/:categoryId")
 	.get(CategoryController.getChildrenOfThisCategory)
-	.put(
-		auth.protect,
-		auth.allowTo("admin"),
-		CategoryController.updateThisCategory
-	)
-	.delete(
-		auth.protect,
-		auth.allowTo("admin"),
-		CategoryController.deleteThisCategory
-	);
+	.put(protect, allowTo("admin"), CategoryController.updateThisCategory)
+	.delete(protect, allowTo("admin"), CategoryController.deleteThisCategory);
 
 module.exports = router;

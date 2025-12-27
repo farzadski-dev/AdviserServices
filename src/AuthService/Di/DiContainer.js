@@ -2,7 +2,8 @@ const UserModel = require("../Models/UserModel"),
 	UserRepositoryPostgreSQL = require("../Repositories/UserRepository.PostgreSQL");
 
 const LoginService = require("../Services/Login.Service"),
-	SingUpService = require("../Services/SingUp.Service");
+	SingUpService = require("../Services/SingUp.Service"),
+	TokenService = require("../Services/Token.Service");
 
 let _container;
 
@@ -21,6 +22,8 @@ module.exports = {
 				Services: {
 					loginService: undefined,
 					singUpService: undefined,
+					tokenService: new TokenService(),
+					getUserByPkService: undefined,
 				},
 			};
 

@@ -1,5 +1,4 @@
-const IService = require("../../../Core/IService"),
-	Token = require("./token/Token"),
+const IService = require("@Core/IService"),
 	{
 		ThisUserIsNotExistException,
 		UsernameOrPasswordInIncorrectException,
@@ -35,10 +34,10 @@ class LoginService extends IService {
 			})
 		) {
 			user.password = undefined;
-			token = await new Token({
+			token = await this._container.Services.tokenService.Execute({
 				id: user.id,
 				role: user.role,
-			}).sign();
+			});
 		} else {
 			throw new UsernameOrPasswordInIncorrectException();
 		}

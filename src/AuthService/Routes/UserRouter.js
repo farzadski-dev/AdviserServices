@@ -1,7 +1,7 @@
 const express = require("express"),
 	_container = require("../Di/DiContainer").get(),
 	AuthController = require("../Controllers/AuthController"),
-	{ login, singUp } = new AuthController(_container);
+	{ login, singUp, protect } = new AuthController(_container);
 
 class UserRouter extends express.Router {
 	constructor() {

@@ -3,7 +3,7 @@ class IService {
 	 * @param _
 	 * @return any
 	 */
-	execute(_) {
+	Execute(_) {
 		throw new Error("NOT_IMPLEMENTED");
 	}
 }

@@ -1,5 +1,6 @@
 const IUserRepository = require("../Core/IUserRepository"),
-	bcrypt = require("bcryptjs");
+	bcrypt = require("bcryptjs"),
+	as = "belongs_category";
 
 class UserRepositoryPostgreSQL extends IUserRepository {
 	/**
@@ -10,6 +11,7 @@ class UserRepositoryPostgreSQL extends IUserRepository {
 
 		Object.assign(this, {
 			DBModel,
+			model: undefined,
 		});
 	}
 
@@ -29,6 +31,24 @@ class UserRepositoryPostgreSQL extends IUserRepository {
 		const { values, options } = input;
 
 		return this.DBModel.create(values, options);
+	}
+
+	async GetUserByPk(input) {
+		const { userId } = input;
+
+		if (this.model === undefined) {
+			const { Category } = require("../../models");
+			Object.assign(this, { Category });
+		}
+
+		return this.DBModel.findByPk(userId, {
+			include: [
+				{
+					model: this.Category,
+					as,
+				},
+			],
+		});
 	}
 }
 

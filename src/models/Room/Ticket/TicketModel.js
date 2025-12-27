@@ -1,10 +1,10 @@
-const { DataTypes, Sequelize } = require('sequelize');
+const { DataTypes, Sequelize } = require("sequelize");
 
-const PostgresDB = require('../../../database/PostgresDB');
+const PostgresDB = require("../../../database/PostgresDB");
 const { sequelize } = new PostgresDB();
 
 const Ticket = sequelize.define(
-	'ticket',
+	"ticket",
 	{
 		id: {
 			type: Sequelize.UUID,
@@ -17,8 +17,11 @@ const Ticket = sequelize.define(
 			allowNull: false,
 		},
 		status: {
-			type: DataTypes.ENUM('progress', 'done'),
-			defaultValue: 'progress',
+			type: DataTypes.STRING,
+			defaultValue: "progress",
+			validate: {
+				isIn: [["progress", "done"]],
+			},
 		},
 		is_entered: {
 			type: DataTypes.BOOLEAN,
@@ -32,7 +35,7 @@ const Ticket = sequelize.define(
 	{
 		paranoid: true,
 		timestamps: true,
-	}
+	},
 );
 
 /**

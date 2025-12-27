@@ -1,19 +1,16 @@
 const dotenv = require("dotenv");
 dotenv.config({ path: "../config.env" });
 
-const PostgresDB = require("./PostgresDB");
-const { sequelize } = new PostgresDB();
-
-const TAG = `app:${__filename.slice(__dirname.length + 1, -3)}`;
-const myDebugger = require("../utils/debugger")(TAG);
+const PostgresDB = require("./PostgresDB"),
+	{ sequelize } = new PostgresDB();
 
 class SyncPostgresDB {
 	async sync() {
 		try {
 			await sequelize.sync({ alter: true });
-			myDebugger("Sync is Done!");
+			echo({ message: "SYNC_IS_DONE" });
 		} catch (error) {
-			myDebugger(error);
+			echo({ message: "SYNC_IS_NOT_SUCCESSFUL", error });
 		}
 	}
 }

@@ -1,4 +1,4 @@
-const IService = require("../../../Core/IService"),
+const IService = require("@Core/IService"),
 	PasswordValidation = require("../../validations/Password/PasswordValidation");
 
 class SingUpService extends IService {
@@ -12,7 +12,7 @@ class SingUpService extends IService {
 	 * @throws [PasswordLengthValidationException | PasswordNonWhiteSpaceValidationException | PasswordContainsLowercaseValidationException | PasswordContainsUppercaseValidationException | PasswordContainsNumberValidationException | PasswordContainsSymbolValidationException]
 	 * @returns {Promise<Object.<{id: string, role: string, username: string, password: string, updatedAt: Date, createdAt: Date, categoryId: string}>>}
 	 */
-	async execute(input) {
+	async Execute(input) {
 		const { username, password, role } = input;
 
 		PasswordValidation.validate(password);

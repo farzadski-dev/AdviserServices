@@ -1,8 +1,5 @@
 const { Sequelize } = require("sequelize");
 
-const TAG = `app:${__filename.slice(__dirname.length + 1, -3)}`;
-const myDebugger = require("../utils/debugger")(TAG);
-
 class PostgresDB {
 	sequelize;
 
@@ -15,8 +12,6 @@ class PostgresDB {
 			return _instance;
 		}
 
-		myDebugger(process.env.POSTGRES_HOST);
-
 		this.sequelize = new Sequelize(
 			process.env.POSTGRES_LOCAL_DATABASE,
 			process.env.POSTGRES_DATABASE_USERNAME,
@@ -25,7 +20,7 @@ class PostgresDB {
 				dialect: process.env.POSTGRES_DIALECT,
 				port: 5432,
 				logging: false,
-			}
+			},
 		);
 		this.constructor._instance = this;
 	}
@@ -33,9 +28,9 @@ class PostgresDB {
 	async connect() {
 		try {
 			await this.sequelize.authenticate();
-			myDebugger("Connection has been established successfully.");
+			echo({ message: "CONNECTION_HAS_BEEN_ESTABLISHED_SUCCESSFULLY" });
 		} catch (error) {
-			myDebugger("Unable to connect to the database:", error);
+			echo({ message: "UNABLE_TO_CONNECT_TO_THE_DATABASE", error });
 		}
 	}
 }

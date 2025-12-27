@@ -10,6 +10,10 @@ class IUserRepository {
 	Create(_input) {
 		throw new Error("NOT_IMPLEMENTED");
 	}
+
+	GetUserByPk(_input) {
+		throw new Error("NOT_IMPLEMENTED");
+	}
 }
 
 module.exports = IUserRepository;
