@@ -1,13 +1,15 @@
-const jwt = require("jsonwebtoken"),
-	catchAsync = require("../../utils/catchAsync"),
+const catchAsync = require("../../utils/catchAsync"),
 	Helper = require("../../utils/Helper"),
-	Controller = require("../../core/Controller");
+	Controller = require("../../core/Controller"),
+	GenericQueryParser = require("@Core/GenericQueryParser");
 
 class AuthController extends Controller {
 	constructor(_container) {
 		super();
 
-		Object.assign(this, { _container });
+		Object.assign(this, {
+			_container,
+		});
 	}
 
 	SignUp = this.asyncWrap.Wrap(async (rq, rp, _nx) => {
@@ -73,17 +75,8 @@ class AuthController extends Controller {
 				categoryId,
 				userId,
 			});
-		// const user = await User.update(
-		// 	{
-		// 		categoryId,
-		// 	},
-		// 	{
-		// 		where: { id: userId },
-		// 	},
-		// );
 
-		rs.status(200).json({
-			status: "success",
+		this.sendSuccessResponse(rs, {
 			data: {
 				user,
 			},
@@ -91,21 +84,45 @@ class AuthController extends Controller {
 	});
 
 	changeRoleOfThisUser = catchAsync(async (request, response, next) => {
-		const { role, userId } = request.body;
-		const user = await User.update(
-			{
+		const { role, userId } = request.body,
+			user = await this._container.Services.changeUserRoleService.Execute({
 				role,
-			},
-			{
-				where: { id: userId },
-			},
-		);
+				userId,
+			});
+		// const user = await User.update(
+		// 	{
+		// 		role,
+		// 	},
+		// 	{
+		// 		where: { id: userId },
+		// 	},
+		// );
 
-		response.status(200).json({
-			status: "success",
+		this.sendSuccessResponse(rs, {
 			data: {
 				user,
 			},
+		});
+		// response.status(200).json({
+		// 	status: "success",
+		// 	data: {
+		// 		user,
+		// 	},
+		// });
+	});
+
+	GetAllUsers = this.asyncWrap.Wrap(async (rq, rs, _nx) => {
+		const query = this._container.Utilities._getGenericQueryParser().Parse(
+				rq.query,
+			),
+			{ users, paginationInfo } =
+				await this._container.Services.getAllUsersService.Execute(query);
+
+		this.sendSuccessResponse(rs, {
+			data: {
+				users,
+			},
+			paginationInfo,
 		});
 	});
 
@@ -119,13 +136,6 @@ class AuthController extends Controller {
 			}
 			next();
 		};
-	};
-
-	signToken = (id, role) => {
-		return jwt.sign({ id, role }, process.env.OUR_JWT_SECRET, {
-			expiresIn: process.env.OUR_JWT_EXPIRED_TIME,
-			algorithm: "HS512",
-		});
 	};
 }
 

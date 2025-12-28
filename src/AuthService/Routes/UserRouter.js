@@ -1,7 +1,7 @@
 const express = require("express"),
 	_container = require("../Di/DiContainer").get(),
 	AuthController = require("../Controllers/AuthController"),
-	{ login, singUp, allowTo, assignACategoryToThisUser, protect } =
+	{ login, singUp, allowTo, assignACategoryToThisUser, protect, GetAllUsers } =
 		new AuthController(_container);
 
 class UserRouter extends express.Router {
@@ -16,6 +16,8 @@ class UserRouter extends express.Router {
 			allowTo("admin"),
 			assignACategoryToThisUser,
 		);
+
+		this.get("/", protect, allowTo("admin"), GetAllUsers);
 	}
 }
 

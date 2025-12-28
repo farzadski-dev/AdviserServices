@@ -4,21 +4,28 @@ const IUserRepository = require("../Core/IUserRepository"),
 
 class UserRepositoryPostgreSQL extends IUserRepository {
 	/**
-	 * @param DBModel {Sequelize.define<M>}
+	 * @param _container.Models
 	 */
-	constructor(DBModel) {
+	constructor(_container) {
 		super();
 
 		Object.assign(this, {
-			DBModel,
-			model: undefined,
+			_container,
 		});
 	}
 
 	async FindOne(input) {
 		const { where } = input;
 
-		return this.DBModel.findOne({ where });
+		return this._container.Models.UserModel.findOne({
+			where,
+			include: [
+				{
+					model: this._container.Models.GetCategoryModel(),
+					as,
+				},
+			],
+		});
 	}
 
 	async IsThisPasswordCorrect(input) {
@@ -30,21 +37,16 @@ class UserRepositoryPostgreSQL extends IUserRepository {
 	async Create(input) {
 		const { values, options } = input;
 
-		return this.DBModel.create(values, options);
+		return this._container.Models.UserModel.create(values, options);
 	}
 
 	async GetUserByPk(input) {
 		const { userId } = input;
 
-		if (this.model === undefined) {
-			const { Category } = require("../../models");
-			Object.assign(this, { Category });
-		}
-
-		return this.DBModel.findByPk(userId, {
+		return this._container.Models.UserModel.findByPk(userId, {
 			include: [
 				{
-					model: this.Category,
+					model: this._container.Models.GetCategoryModel(),
 					as,
 				},
 			],
@@ -54,7 +56,24 @@ class UserRepositoryPostgreSQL extends IUserRepository {
 	async Update(input) {
 		const { values, where } = input;
 
-		return this.DBModel.update(values, { where, returning: true });
+		return this._container.Models.UserModel.update(values, {
+			where,
+			returning: true,
+		});
+	}
+
+	async GetAllUsers(input) {
+		const { where, options } = input;
+		return this._container.Models.UserModel.findAll({
+			where,
+			include: [
+				{
+					model: this._container.Models.GetCategoryModel(),
+					as,
+				},
+			],
+			...options,
+		});
 	}
 }
 
